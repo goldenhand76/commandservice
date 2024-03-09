@@ -40,7 +40,9 @@ namespace CommandsService.Data
 
         public Command GetCommand(int platformId, int commandId)
         {
+            #pragma warning disable CS8603
             return _context.Commands.Where(c => c.PlatformId == platformId && c.Id==commandId).FirstOrDefault();
+            #pragma warning restore CS8603
         }
 
         public IEnumerable<Command> GetCommandsFromPlatform(int platformId)
