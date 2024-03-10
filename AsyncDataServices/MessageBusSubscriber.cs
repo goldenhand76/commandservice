@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CommandsService.EventProcessing;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace CommandsService.AsyncDataServices
 {
@@ -38,7 +40,17 @@ namespace CommandsService.AsyncDataServices
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            stoppingToken.ThrowIfCancellationRequested();
+            var consumer = new EventingBasicConsumer(_channel);
+            consumer.Received += (ModuleHandle, ea) =>
+            {
+                Console.WriteLine("--> Event Recieved");
+                var body = ea.Body;
+                var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
+                _eventProcessor.ProcessEvent(notificationMessage);
+            };
+            _channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+            return Task.CompletedTask;
         }
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
