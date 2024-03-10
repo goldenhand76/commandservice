@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
+using CommandsService.Data;
 using CommandsService.Dtos;
+using CommandsService.Models;
 
 namespace CommandsService.EventProcessing
 {
@@ -20,7 +22,15 @@ namespace CommandsService.EventProcessing
         }
         public void ProcessEvent(string message)
         {
-            throw new NotImplementedException();
+            var eventType = DetermineEvent(message);
+            switch(eventType)
+            {
+                case EventType.PlatformPublished:
+                    // TODO: 
+                    break; 
+                default:
+                    break;    
+            }
         }
 
         private EventType DetermineEvent(string notificationMessage)
@@ -36,6 +46,31 @@ namespace CommandsService.EventProcessing
                 default:
                     Console.WriteLine("--> Could not Determent Event Type");
                     return EventType.Undetermined;
+            }
+        }
+        private void addPlatform(string platformPublishedMessage)
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var repo = scope.ServiceProvider.GetRequiredService<ICommandRepo>();
+                var platformPublishedDto = JsonSerializer.Deserialize<PlatformPublishedDto>(platformPublishedMessage);
+                try
+                {
+                    var plat = _mapper.Map<Platform>(platformPublishedDto);
+                    if(!repo.ExternalPlatformExists(plat.ExternalID))
+                    {
+                        repo.CreatePlatform(plat);
+                        repo.SaveChanges();
+                    }
+                    else
+                    {
+                        Console.WriteLine("--> Platform Already Exists");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--> Could not add Platform to DB {ex.Message}");
+                }
             }
         }
     }
