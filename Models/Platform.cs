@@ -8,14 +8,16 @@ namespace CommandsService.Models
 {
     public class Platform
     {
+        #pragma warning disable CS8618
         [Key]
         [Required]
         public int Id { get; set; }
         [Required]
         public int ExternalID { get; set; }
         [Required]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
         public ICollection<Command> Commands { get; set; } = new List<Command>();
+        #pragma warning restore CS8618
 
     }
 }
