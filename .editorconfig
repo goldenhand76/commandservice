@@ -26,3 +26,7 @@ dotnet_diagnostic.CS8622.severity = none
 
 # CS8604: Possible null reference argument.
 dotnet_diagnostic.CS8618.severity = none
+[*.cs]
+
+# CS8604: Possible null reference argument.
+dotnet_diagnostic.CS8603.severity = none
